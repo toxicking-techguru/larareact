@@ -1,0 +1,44 @@
+name: Laravel + React CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      # Build and Start Docker Compose
+      - name: Set up Docker Compose
+        run: |
+          docker-compose up -d --build
+
+      # Wait for MySQL to be ready
+      - name: Wait for MySQL to be ready
+        run: |
+          until docker exec mysql mysqladmin ping --silent; do
+            echo "Waiting for MySQL...";
+            sleep 1;
+          done
+
+      # Run Laravel Tests
+      - name: Run Laravel Tests
+        run: |
+          docker exec laravel.test php artisan test
+
+      # Run React Tests
+      - name: Run React Tests
+        run: |
+          docker exec laravel.test npm test --prefix frontend
