@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline Test
 
 on:
   push:
@@ -6,14 +6,31 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
     steps:
-      # Checkout the repository code
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+<<<<<<< HEAD
       # Install Docker Compose
       - name: Install Docker Compose
         run: |
@@ -22,8 +39,12 @@ jobs:
 
       # Build and Start Docker Compose
       - name: Set up Docker Compose
+=======
+      # Set up Docker
+      - name: Build and Start Docker Compose
+>>>>>>> 85928bbc05f759bfcbdbd1a1959b2ee4fc038d45
         run: |
-          docker-compose up -d --build
+          docker-compose up -d
 
       # Wait for MySQL to be ready
       - name: Wait for MySQL to be ready
